@@ -1,0 +1,37 @@
+.profileImageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.profileImage {
+  width: 100%;
+  height: auto;
+  max-width: 400px;
+  border-radius: 50%;
+  object-fit: cover;
+  aspect-ratio: 1 / 1;
+}
+
+/* Mobile: 320px+ */
+@media (min-width: 320px) {
+  .profileImage {
+    max-width: 200px;
+  }
+}
+
+/* Tablet: 768px+ */
+@media (min-width: 768px) {
+  .profileImage {
+    max-width: 250px;
+  }
+}
+
+/* Desktop: 1024px+ */
+@media (min-width: 1024px) {
+  .profileImage {
+    max-width: 400px;
+  }
+}
+
