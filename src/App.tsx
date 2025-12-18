@@ -6,7 +6,7 @@ import ResearchPage from './pages/research'
 
 function App() {
   return (
-    <BrowserRouter basename="/mematcha.github.io">
+    <BrowserRouter basename="/">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/ml" element={<MLPage />} />
@@ -18,4 +18,3 @@ function App() {
 }
 
 export default App
-
