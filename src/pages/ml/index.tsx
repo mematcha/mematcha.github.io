@@ -12,6 +12,8 @@ const MLPage: React.FC = () => {
           <Link to="/ml" className={`${styles.navLink} ${styles.active}`}>ML</Link>
           <Link to="/swe" className={styles.navLink}>SWE</Link>
           <Link to="/research" className={styles.navLink}>Research</Link>
+          <Link to="/blog" className={styles.navLink}>Blog</Link>
+          <Link to="/demos" className={styles.navLink}>Demos</Link>
         </nav>
       </header>
 
