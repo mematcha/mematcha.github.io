@@ -69,3 +69,5 @@ Thumbs.db
 specs/
 .cursor/
 .specify/
+
+client_secret_*
