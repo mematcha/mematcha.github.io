@@ -27,11 +27,23 @@ CONNECTOR=gcp GCP_PROJECT_ID=your-project python -m scripts.seed_firestore
 Populates profile, education, experience, skills, projects, and a welcome post.
 Safe to re-run (skips populated collections).
 
-## 3. Configure Firebase Auth
+## 3. Configure Identity Platform (Google sign-in)
 
-- In the Firebase console, enable the **Google** sign-in provider.
-- Add authorized domains: `localhost`, `mematcha.github.io`, and any custom
-  domain.
+Do this in **Google Cloud Console** (same project), not a separate product:
+
+1. Open **Identity Platform** → **Providers** → enable **Google**.
+2. Open **Identity Platform** → **Settings** → **Authorized domains**.
+3. Add (if missing):
+   - `localhost`
+   - `mematcha.github.io`
+4. Also check **APIs & Services → Credentials → OAuth 2.0 Client (Web)**:
+   - Authorized JavaScript origins: `http://localhost:5173`, `https://mematcha.github.io`
+   - Authorized redirect URIs: include your auth domain callback if listed
+     (often `https://mematcha-portfolio.firebaseapp.com/__/auth/handler`)
+
+If you see `auth/unauthorized-domain` on `/admin/login`, the site origin is
+missing from step 3 — the Google consent screen will not appear until that
+domain is authorized.
 
 ## 4. Health and CMS verification checklist
 

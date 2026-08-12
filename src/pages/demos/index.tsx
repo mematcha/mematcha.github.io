@@ -49,7 +49,7 @@ export default function DemosIndex() {
         </section>
       </main>
       <footer className={styles.footer}>
-        <p>&copy; {new Date().getFullYear()} Sai Sathwik Matcha. All rights reserved.</p>
+        <p>❤️ made with Cursor</p>
       </footer>
     </div>
   )
