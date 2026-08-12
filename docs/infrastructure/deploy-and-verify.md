@@ -8,10 +8,12 @@ Manual first deployment of the backend and initial data seed. Run after
 ```bash
 cd backend
 PROJECT_ID=your-project REGION=us-central1 ./deploy.sh
+# Or from the repo root:
+# PROJECT_ID=your-project REGION=us-central1 ./backend/deploy.sh
 ```
 
-This builds the image with Cloud Build, pushes it to Artifact Registry, and
-deploys the Cloud Run service with the runtime service account.
+The script always uses `backend/` (where `Dockerfile` lives) as the Cloud Build
+context, matching the CI workflow.
 
 Capture the printed service URL; it is your `VITE_API_URL`.
 

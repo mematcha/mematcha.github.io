@@ -27,6 +27,33 @@ def test_draft_post_hidden_then_published_visible(client):
     assert client.get("/api/posts/hello-world").status_code == 200
 
 
+def test_republish_preserves_original_published_at(client):
+    created = client.post(
+        "/api/admin/posts",
+        headers=auth(),
+        json={"slug": "evergreen", "title": "Evergreen", "status": "draft"},
+    )
+    post_id = created.json()["id"]
+
+    first = client.post(f"/api/admin/posts/{post_id}/publish", headers=auth())
+    assert first.status_code == 200
+    original = first.json()["published_at"]
+    assert original is not None
+
+    unpublished = client.post(
+        f"/api/admin/posts/{post_id}/publish?publish=false", headers=auth()
+    )
+    assert unpublished.status_code == 200
+    assert unpublished.json()["status"] == "draft"
+    # First-publish timestamp is retained while draft.
+    assert unpublished.json()["published_at"] == original
+
+    republished = client.post(f"/api/admin/posts/{post_id}/publish", headers=auth())
+    assert republished.status_code == 200
+    assert republished.json()["status"] == "published"
+    assert republished.json()["published_at"] == original
+
+
 def test_profile_update_reflected_publicly(client):
     resp = client.put(
         "/api/admin/profile",

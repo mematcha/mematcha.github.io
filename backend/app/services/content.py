@@ -120,7 +120,12 @@ class ContentService:
             "updated_by_email": email,
         }
         if publish:
-            patch["published_at"] = _now()
+            existing = self.db.get(collection, doc_id)
+            if existing is None:
+                return None
+            # Preserve the original published_at across unpublish/republish cycles.
+            if not existing.get("published_at"):
+                patch["published_at"] = _now()
         return self.db.update(collection, doc_id, patch)
 
 
