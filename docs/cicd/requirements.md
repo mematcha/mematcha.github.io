@@ -48,11 +48,11 @@ For `gcloud builds submit` from CI:
 - `roles/serviceusage.serviceUsageConsumer` — use project APIs
 - `roles/logging.viewer` — optional log access
 - `roles/iam.serviceAccountUser` on the default Compute SA
-  (`PROJECT_NUMBER-compute@developer.gserviceaccount.com`) and the classic
-  Cloud Build SA (`PROJECT_NUMBER@cloudbuild.gserviceaccount.com`)
+  (`PROJECT_NUMBER-compute@developer.gserviceaccount.com`) — this project’s
+  Cloud Build runner (legacy `@cloudbuild.gserviceaccount.com` is not used)
 
-Also granted to the build runner SAs:
-- `roles/artifactregistry.writer` on Compute + Cloud Build SAs — push the image
+Also granted to the build runner SA:
+- `roles/artifactregistry.writer` on the Compute SA — push the image
 
 The backend workflow submits builds with `--async` and polls
 `gcloud builds describe` so CI does not fail when it cannot stream the default

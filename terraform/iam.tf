@@ -2,10 +2,10 @@ data "google_project" "this" {
   project_id = var.project_id
 }
 
-# Default Compute Engine SA — Cloud Build uses this to run builds in many projects.
+# Default Compute Engine SA — Cloud Build runs as this SA in this project
+# (the legacy PROJECT_NUMBER@cloudbuild.gserviceaccount.com does not exist here).
 locals {
-  compute_sa_email    = "${data.google_project.this.number}-compute@developer.gserviceaccount.com"
-  cloudbuild_sa_email = "${data.google_project.this.number}@cloudbuild.gserviceaccount.com"
+  compute_sa_email = "${data.google_project.this.number}-compute@developer.gserviceaccount.com"
 }
 
 # ---- Runtime service account (used by the Cloud Run service) ----------------
@@ -90,23 +90,11 @@ resource "google_service_account_iam_member" "deployer_actas_compute" {
   member             = "serviceAccount:${google_service_account.deployer.email}"
 }
 
-resource "google_service_account_iam_member" "deployer_actas_cloudbuild" {
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${local.cloudbuild_sa_email}"
-  role               = "roles/iam.serviceAccountUser"
-  member             = "serviceAccount:${google_service_account.deployer.email}"
-}
-
 # Build runner must push the image to Artifact Registry.
 resource "google_project_iam_member" "compute_ar_writer" {
   project = var.project_id
   role    = "roles/artifactregistry.writer"
   member  = "serviceAccount:${local.compute_sa_email}"
-}
-
-resource "google_project_iam_member" "cloudbuild_ar_writer" {
-  project = var.project_id
-  role    = "roles/artifactregistry.writer"
-  member  = "serviceAccount:${local.cloudbuild_sa_email}"
 }
 
 # ---- Workload Identity Federation: GitHub Actions -> deploy SA --------------
