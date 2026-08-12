@@ -37,9 +37,26 @@ deploy service account.
 
 ## Required GCP roles (granted by Terraform to the deploy SA)
 
+For Cloud Run deploy:
 - `roles/run.admin` — deploy Cloud Run
-- `roles/artifactregistry.writer` — push images
+- `roles/artifactregistry.writer` — push/read images
 - `roles/iam.serviceAccountUser` on the runtime SA — set it on the service
+
+For `gcloud builds submit` from CI:
+- `roles/cloudbuild.builds.editor` — create builds
+- `roles/storage.admin` — upload source to `*_cloudbuild` bucket
+- `roles/serviceusage.serviceUsageConsumer` — use project APIs
+- `roles/logging.viewer` — optional log access
+- `roles/iam.serviceAccountUser` on the default Compute SA
+  (`PROJECT_NUMBER-compute@developer.gserviceaccount.com`) and the classic
+  Cloud Build SA (`PROJECT_NUMBER@cloudbuild.gserviceaccount.com`)
+
+Also granted to the build runner SAs:
+- `roles/artifactregistry.writer` on Compute + Cloud Build SAs — push the image
+
+The backend workflow submits builds with `--async` and polls
+`gcloud builds describe` so CI does not fail when it cannot stream the default
+logs bucket.
 
 ## Path filters
 

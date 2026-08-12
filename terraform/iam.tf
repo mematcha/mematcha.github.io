@@ -2,6 +2,12 @@ data "google_project" "this" {
   project_id = var.project_id
 }
 
+# Default Compute Engine SA — Cloud Build uses this to run builds in many projects.
+locals {
+  compute_sa_email    = "${data.google_project.this.number}-compute@developer.gserviceaccount.com"
+  cloudbuild_sa_email = "${data.google_project.this.number}@cloudbuild.gserviceaccount.com"
+}
+
 # ---- Runtime service account (used by the Cloud Run service) ----------------
 
 resource "google_service_account" "runtime" {
@@ -47,6 +53,60 @@ resource "google_service_account_iam_member" "deployer_actas_runtime" {
   service_account_id = google_service_account.runtime.name
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${google_service_account.deployer.email}"
+}
+
+# --- Cloud Build permissions for `gcloud builds submit` from CI ---------------
+
+resource "google_project_iam_member" "deployer_cloudbuild_editor" {
+  project = var.project_id
+  role    = "roles/cloudbuild.builds.editor"
+  member  = "serviceAccount:${google_service_account.deployer.email}"
+}
+
+# Upload source tarball to gs://PROJECT_ID_cloudbuild (and related buckets).
+resource "google_project_iam_member" "deployer_storage_admin" {
+  project = var.project_id
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${google_service_account.deployer.email}"
+}
+
+resource "google_project_iam_member" "deployer_serviceusage" {
+  project = var.project_id
+  role    = "roles/serviceusage.serviceUsageConsumer"
+  member  = "serviceAccount:${google_service_account.deployer.email}"
+}
+
+# Optional: log access if a tool streams the default logs bucket.
+resource "google_project_iam_member" "deployer_logging_viewer" {
+  project = var.project_id
+  role    = "roles/logging.viewer"
+  member  = "serviceAccount:${google_service_account.deployer.email}"
+}
+
+# github-deployer must be allowed to act as the SA that executes the build.
+resource "google_service_account_iam_member" "deployer_actas_compute" {
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${local.compute_sa_email}"
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.deployer.email}"
+}
+
+resource "google_service_account_iam_member" "deployer_actas_cloudbuild" {
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${local.cloudbuild_sa_email}"
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.deployer.email}"
+}
+
+# Build runner must push the image to Artifact Registry.
+resource "google_project_iam_member" "compute_ar_writer" {
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${local.compute_sa_email}"
+}
+
+resource "google_project_iam_member" "cloudbuild_ar_writer" {
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${local.cloudbuild_sa_email}"
 }
 
 # ---- Workload Identity Federation: GitHub Actions -> deploy SA --------------

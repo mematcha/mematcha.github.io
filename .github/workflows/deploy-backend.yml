@@ -55,7 +55,24 @@ jobs:
         run: |
           IMAGE="${REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${REPO}/${SERVICE}:${GITHUB_SHA::7}"
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
-          gcloud builds submit backend --tag "$IMAGE" --suppress-logs
+          # Submit asynchronously and poll status via the Cloud Build API.
+          # Avoids gcloud exiting 1 when it cannot stream the default logs bucket.
+          BUILD_ID=$(gcloud builds submit backend --tag "$IMAGE" --async --format='value(id)')
+          echo "Cloud Build ID: ${BUILD_ID}"
+          for i in $(seq 1 60); do
+            STATUS=$(gcloud builds describe "${BUILD_ID}" --format='value(status)')
+            echo "Build status: ${STATUS}"
+            case "${STATUS}" in
+              SUCCESS) exit 0 ;;
+              FAILURE|INTERNAL_ERROR|TIMEOUT|CANCELLED|EXPIRED)
+                echo "Build failed with status ${STATUS}"
+                exit 1
+                ;;
+            esac
+            sleep 10
+          done
+          echo "Timed out waiting for build ${BUILD_ID}"
+          exit 1
 
       - name: Deploy to Cloud Run
         run: |
