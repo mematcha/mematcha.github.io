@@ -14,7 +14,7 @@ sequenceDiagram
   participant API as Cloud Run API
 
   Admin->>CMS: Visit /admin
-  CMS->>Firebase: Sign in (Google / GitHub)
+  CMS->>Firebase: Sign in (Google)
   Firebase-->>CMS: ID token (with email)
   CMS->>CMS: Client-side allowlist check
   Admin->>CMS: Edit + Publish
@@ -72,6 +72,6 @@ The allowlist is configured by `ADMIN_ALLOWED_EMAILS` (backend) and
 | Mode | When | Sign-in |
 |------|------|---------|
 | `mock` | Local dev / tests | Email field mints a `dev:<email>` token |
-| `firebase` | Production | Google / GitHub popup |
+| `firebase` | Production | Google popup (allowlisted emails only) |
 
 Mock mode lets you exercise the entire CMS locally without any Firebase setup.

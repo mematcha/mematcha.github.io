@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     auth_mode: str = "mock"
 
     # Comma-separated list of emails allowed to use the admin CMS API.
-    admin_allowed_emails: str = "matcha.s@northeastern.edu"
+    admin_allowed_emails: str = "admin@example.com"
 
     # GCP configuration (only required when connector == "gcp").
     gcp_project_id: str = ""

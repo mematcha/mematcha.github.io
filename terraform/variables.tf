@@ -23,7 +23,7 @@ variable "bucket_name" {
 variable "admin_allowed_emails" {
   type        = string
   description = "Comma-separated admin emails allowed to use the CMS."
-  default     = "matcha.s@northeastern.edu"
+  default     = "admin@example.com"
 }
 
 variable "cors_origins" {

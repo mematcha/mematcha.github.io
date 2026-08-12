@@ -8,7 +8,7 @@ import styles from './Admin.module.css'
  * independently enforces the email allowlist on every admin request.
  */
 export default function ProtectedRoute({ children }: { children: JSX.Element }) {
-  const { ready, email, isAdmin } = useAuth()
+  const { ready, email, isAdmin, logout } = useAuth()
   const location = useLocation()
 
   if (!ready) {
@@ -27,6 +27,14 @@ export default function ProtectedRoute({ children }: { children: JSX.Element }) 
           <p className={styles.muted}>
             {email} is not authorized for admin access.
           </p>
+          <button
+            className={styles.btn}
+            style={{ marginTop: '1rem' }}
+            type="button"
+            onClick={() => void logout()}
+          >
+            Sign out
+          </button>
         </div>
       </div>
     )

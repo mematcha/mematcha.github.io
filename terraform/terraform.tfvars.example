@@ -3,7 +3,7 @@
 project_id           = "your-gcp-project-id"
 region               = "us-central1"
 bucket_name          = "your-unique-portfolio-media-bucket"
-admin_allowed_emails = "matcha.s@northeastern.edu"
+admin_allowed_emails = "you@example.com"
 cors_origins         = "http://localhost:5173,https://mematcha.github.io"
 github_repository    = "mematcha/mematcha.github.io"
 

@@ -34,7 +34,7 @@ def test_profile_update_reflected_publicly(client):
         json={"name": "Sathwik M.", "tagline": "ML Engineer"},
     )
     assert resp.status_code == 200
-    assert resp.json()["updated_by_email"] == "matcha.s@northeastern.edu"
+    assert resp.json()["updated_by_email"] == "admin@example.com"
     assert client.get("/api/profile").json()["name"] == "Sathwik M."
 
 

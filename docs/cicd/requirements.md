@@ -27,7 +27,7 @@ deploy service account.
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | `terraform output workload_identity_provider` | backend |
 | `GCP_DEPLOY_SA` | `terraform output deployer_service_account` | backend |
 | `VITE_API_URL` | `terraform output api_url` | frontend |
-| `VITE_ADMIN_EMAILS` | your allowlist (e.g. `matcha.s@northeastern.edu`) | frontend |
+| `VITE_ADMIN_EMAILS` | your allowlist (e.g. `admin@example.com`) | frontend |
 | `VITE_FIREBASE_API_KEY` | Firebase web app config | frontend |
 | `VITE_FIREBASE_AUTH_DOMAIN` | Firebase web app config | frontend |
 | `VITE_FIREBASE_PROJECT_ID` | Firebase web app config | frontend |

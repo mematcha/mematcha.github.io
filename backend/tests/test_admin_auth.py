@@ -19,4 +19,4 @@ def test_admin_rejects_malformed_token(client):
 def test_admin_allows_allowlisted_email(client):
     resp = client.get("/api/admin/me", headers=auth())
     assert resp.status_code == 200
-    assert resp.json()["email"] == "matcha.s@northeastern.edu"
+    assert resp.json()["email"] == "admin@example.com"

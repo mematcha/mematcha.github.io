@@ -8,7 +8,6 @@ import {
   type ReactNode,
 } from 'react'
 import {
-  GithubAuthProvider,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
@@ -27,7 +26,6 @@ interface AuthState {
   isAdmin: boolean
   getToken: () => Promise<string | null>
   loginWithGoogle: () => Promise<void>
-  loginWithGithub: () => Promise<void>
   loginDev: (email: string) => void
   logout: () => Promise<void>
 }
@@ -43,7 +41,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (mock) {
       const token = localStorage.getItem(DEV_TOKEN_KEY)
-      if (token?.startsWith('dev:')) setEmail(token.slice('dev:'.length))
+      if (token?.startsWith('dev:')) {
+        const stored = token.slice('dev:'.length)
+        // Drop any previously saved non-allowlisted mock session.
+        if (isAdminEmail(stored)) setEmail(stored)
+        else localStorage.removeItem(DEV_TOKEN_KEY)
+      }
       setReady(true)
       return
     }
@@ -52,7 +55,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setReady(true)
       return
     }
-    return onAuthStateChanged(auth, (user) => {
+    return onAuthStateChanged(auth, async (user) => {
+      if (user && !isAdminEmail(user.email)) {
+        await signOut(auth)
+        setFirebaseUser(null)
+        setEmail(null)
+        setReady(true)
+        return
+      }
       setFirebaseUser(user)
       setEmail(user?.email ?? null)
       setReady(true)
@@ -66,28 +76,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [mock, firebaseUser])
 
   const loginDev = useCallback((devEmail: string) => {
-    const token = `dev:${devEmail.trim().toLowerCase()}`
+    const normalized = devEmail.trim().toLowerCase()
+    if (!isAdminEmail(normalized)) {
+      throw new Error(`${normalized || '(empty)'} is not authorized for admin access`)
+    }
+    const token = `dev:${normalized}`
     localStorage.setItem(DEV_TOKEN_KEY, token)
-    setEmail(devEmail.trim().toLowerCase())
+    setEmail(normalized)
   }, [])
 
-  const loginWithProvider = useCallback(
-    async (provider: GoogleAuthProvider | GithubAuthProvider) => {
-      const auth = getFirebaseAuth()
-      if (!auth) throw new Error('Firebase is not configured')
-      await signInWithPopup(auth, provider)
-    },
-    [],
-  )
-
-  const loginWithGoogle = useCallback(
-    () => loginWithProvider(new GoogleAuthProvider()),
-    [loginWithProvider],
-  )
-  const loginWithGithub = useCallback(
-    () => loginWithProvider(new GithubAuthProvider()),
-    [loginWithProvider],
-  )
+  const loginWithGoogle = useCallback(async () => {
+    const auth = getFirebaseAuth()
+    if (!auth) throw new Error('Firebase is not configured')
+    const result = await signInWithPopup(auth, new GoogleAuthProvider())
+    const signedInEmail = result.user.email
+    if (!isAdminEmail(signedInEmail)) {
+      await signOut(auth)
+      throw new Error(
+        `${signedInEmail ?? 'This account'} is not authorized for admin access`,
+      )
+    }
+  }, [])
 
   const logout = useCallback(async () => {
     if (mock) {
@@ -97,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const auth = getFirebaseAuth()
     if (auth) await signOut(auth)
+    setFirebaseUser(null)
     setEmail(null)
   }, [mock])
 
@@ -107,11 +117,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin: isAdminEmail(email),
       getToken,
       loginWithGoogle,
-      loginWithGithub,
       loginDev,
       logout,
     }),
-    [email, ready, getToken, loginWithGoogle, loginWithGithub, loginDev, logout],
+    [email, ready, getToken, loginWithGoogle, loginDev, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

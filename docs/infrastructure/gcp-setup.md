@@ -23,7 +23,7 @@ Not used in Phase 1: GKE/Kubernetes, Cloud SQL, external Load Balancer.
 2. Link a billing account (required even for Always Free).
 3. Create a budget alert (e.g. $5) in Billing → Budgets & alerts.
 4. Enable Firebase on the project (Firebase console → add project → select the
-   existing GCP project) and enable the Google and GitHub sign-in providers in
+   existing GCP project) and enable the **Google** sign-in provider in
    Firebase Auth. Add authorized domains: `localhost` and
    `mematcha.github.io` (and any custom domain).
 5. Install the `gcloud` CLI and Terraform locally.

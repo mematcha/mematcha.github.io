@@ -42,7 +42,7 @@ scripts/seed_firestore.py
 |---------|---------|---------|
 | `CONNECTOR` | `mock` | `mock` or `gcp` |
 | `AUTH_MODE` | `mock` | `mock` or `firebase` |
-| `ADMIN_ALLOWED_EMAILS` | `matcha.s@northeastern.edu` | CMS allowlist |
+| `ADMIN_ALLOWED_EMAILS` | `admin@example.com` | CMS allowlist |
 | `GCP_PROJECT_ID` | | required when `CONNECTOR=gcp` |
 | `GCS_BUCKET` | | media bucket when `CONNECTOR=gcp` |
 | `CORS_ORIGINS` | localhost + pages | allowed browser origins |

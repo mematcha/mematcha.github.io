@@ -27,7 +27,7 @@ Safe to re-run (skips populated collections).
 
 ## 3. Configure Firebase Auth
 
-- In the Firebase console, enable Google and GitHub providers.
+- In the Firebase console, enable the **Google** sign-in provider.
 - Add authorized domains: `localhost`, `mematcha.github.io`, and any custom
   domain.
 

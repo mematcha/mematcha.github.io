@@ -2,14 +2,15 @@
  * Frontend runtime configuration, read from Vite env vars at build time.
  *
  * `authMode`:
- *  - "mock"     -> a local email sign-in that mints a `dev:<email>` token,
- *                  matching the backend's mock auth (no Firebase needed).
- *  - "firebase" -> real Firebase Auth (Google / GitHub) in production.
+ *  - "mock"     -> local allowlisted-email sign-in that mints a `dev:<email>`
+ *                  token (matches backend mock auth; no Firebase needed).
+ *  - "firebase" -> Google sign-in in production; non-allowlisted emails are
+ *                  signed out immediately.
  */
 export const config = {
   apiUrl: (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') || 'http://localhost:8000',
   authMode: (import.meta.env.VITE_AUTH_MODE as string | undefined) || 'mock',
-  adminEmails: ((import.meta.env.VITE_ADMIN_EMAILS as string | undefined) || 'matcha.s@northeastern.edu')
+  adminEmails: ((import.meta.env.VITE_ADMIN_EMAILS as string | undefined) || 'admin@example.com')
     .split(',')
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean),

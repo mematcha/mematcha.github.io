@@ -27,12 +27,14 @@ Then open `http://localhost:5173/admin`.
 
 ## Signing in
 
-- Local (mock): enter your email (the allowlisted one) and click Sign in.
-- Production (Firebase): click Continue with Google or GitHub and use the
-  account whose email is on the allowlist.
+- Production (Firebase): click **Continue with Google**. Only allowlisted
+  emails are accepted; other Google accounts are signed out immediately.
+- Local (mock): type an allowlisted email yourself (the field is not
+  pre-filled) and click Sign in. Production always uses Google.
 
-If you see "Access denied", your email is not in the allowlist. Update
-`ADMIN_ALLOWED_EMAILS` (backend) and `VITE_ADMIN_EMAILS` (front end).
+If you see "Access denied" / not authorized, your email is not in the
+allowlist. Update `ADMIN_ALLOWED_EMAILS` (backend) and `VITE_ADMIN_EMAILS`
+(front end) — keep them in sync with Terraform `admin_allowed_emails`.
 
 ## Publishing a blog post
 

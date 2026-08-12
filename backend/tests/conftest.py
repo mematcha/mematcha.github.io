@@ -3,7 +3,7 @@ import os
 # Configure the mock stack before any app module reads settings.
 os.environ.setdefault("CONNECTOR", "mock")
 os.environ.setdefault("AUTH_MODE", "mock")
-os.environ.setdefault("ADMIN_ALLOWED_EMAILS", "matcha.s@northeastern.edu")
+os.environ.setdefault("ADMIN_ALLOWED_EMAILS", "admin@example.com")
 
 import pytest
 from fastapi.testclient import TestClient
@@ -12,7 +12,7 @@ from app.config import get_settings
 from app.connectors.factory import reset_connectors
 from app.main import app
 
-ADMIN_EMAIL = "matcha.s@northeastern.edu"
+ADMIN_EMAIL = "admin@example.com"
 ADMIN_TOKEN = f"dev:{ADMIN_EMAIL}"
 OUTSIDER_TOKEN = "dev:stranger@example.com"
 
