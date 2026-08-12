@@ -12,6 +12,8 @@ const SWEPage: React.FC = () => {
           <Link to="/ml" className={styles.navLink}>ML</Link>
           <Link to="/swe" className={`${styles.navLink} ${styles.active}`}>SWE</Link>
           <Link to="/research" className={styles.navLink}>Research</Link>
+          <Link to="/blog" className={styles.navLink}>Blog</Link>
+          <Link to="/demos" className={styles.navLink}>Demos</Link>
         </nav>
       </header>
 

@@ -1,0 +1,11 @@
+# Copy to terraform.tfvars and fill in your values.
+
+project_id           = "your-gcp-project-id"
+region               = "us-central1"
+bucket_name          = "your-unique-portfolio-media-bucket"
+admin_allowed_emails = "matcha.s@northeastern.edu"
+cors_origins         = "http://localhost:5173,https://mematcha.github.io"
+github_repository    = "mematcha/mematcha.github.io"
+
+# Leave container_image at its default for the first apply; CI updates it.
+# container_image = "us-central1-docker.pkg.dev/your-gcp-project-id/containers/portfolio-api:latest"
