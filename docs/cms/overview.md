@@ -58,6 +58,10 @@ The allowlist is configured by `ADMIN_ALLOWED_EMAILS` (backend) and
 
 - Draft/publish: content is created as `draft` and hidden from the public site
   until published. Publishing stamps `published_at`.
+- **Auto-slug:** posts, projects, and demos derive a URL slug from the title
+  (lowercase, hyphens, `[a-z0-9-]` only). The CMS auto-fills while creating until
+  you edit the slug manually. The API always normalizes, generates from title
+  when empty, and appends `-2`, `-3`, … on collisions.
 - Media upload: the editor requests a signed URL, uploads bytes directly to
   Cloud Storage, and stores the resulting public URL.
 - Ordering: education, experience, and skills use a numeric `sort_order`.

@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from typing import Any, Optional
 
 from ..connectors.base import DatabaseConnector, Document
+from .slug import resolve_slug
 
 PROFILE = "profile"
 EDUCATION = "education"
@@ -20,6 +21,9 @@ MEDIA = "media"
 
 # Collections that carry a draft/published status.
 PUBLISHABLE = {PROJECTS, POSTS, DEMOS}
+
+# Collections whose public URLs are keyed by slug.
+SLUGGED = {PROJECTS, POSTS, DEMOS}
 
 
 def _now() -> datetime:
@@ -75,12 +79,33 @@ class ContentService:
         stamped = self._stamp(data, email, creating=False)
         return self.db.set(PROFILE, "profile", stamped)
 
+    def _apply_slug(
+        self,
+        collection: str,
+        data: dict[str, Any],
+        *,
+        exclude_id: Optional[str] = None,
+    ) -> dict[str, Any]:
+        if collection not in SLUGGED:
+            return data
+        data = dict(data)
+        data["slug"] = resolve_slug(
+            self.db,
+            collection,
+            title=str(data.get("title") or ""),
+            slug=str(data.get("slug") or ""),
+            exclude_id=exclude_id,
+        )
+        return data
+
     def create(self, collection: str, data: dict[str, Any], email: str) -> Document:
+        data = self._apply_slug(collection, data)
         stamped = self._stamp(data, email, creating=True)
         return self.db.create(collection, stamped)
 
     def update(self, collection: str, doc_id: str, data: dict[str, Any],
                email: str) -> Optional[Document]:
+        data = self._apply_slug(collection, data, exclude_id=doc_id)
         stamped = self._stamp(data, email, creating=False)
         return self.db.update(collection, doc_id, stamped)
 

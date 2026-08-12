@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import styles from '../../../components/admin/Admin.module.css'
 import { useToast } from '../../../components/admin/Toast'
+import { useAutoSlug } from '../../../components/admin/useAutoSlug'
 import { useAdminApi } from '../../../lib/api'
 import type { Demo, DemoType } from '../../../lib/types'
 
@@ -17,6 +18,7 @@ export default function DemoEditor() {
   const api = useAdminApi()
   const navigate = useNavigate()
   const { show, node } = useToast()
+  const { onTitleChange, onSlugChange, onSlugBlur, setSlugLocked } = useAutoSlug(isNew)
 
   const [demo, setDemo] = useState<Demo>(EMPTY)
   const [saving, setSaving] = useState(false)
@@ -24,7 +26,13 @@ export default function DemoEditor() {
   useEffect(() => {
     if (isNew) return
     void api.get<Demo[]>('/api/admin/demos')
-      .then((all) => { const found = all.find((d) => d.id === id); if (found) setDemo(found) })
+      .then((all) => {
+        const found = all.find((d) => d.id === id)
+        if (found) {
+          setDemo(found)
+          setSlugLocked(true)
+        }
+      })
       .catch((e) => show(e.message, true))
   }, [id, isNew]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -39,11 +47,14 @@ export default function DemoEditor() {
     try {
       if (isNew) {
         const created = await api.post<Demo>('/api/admin/demos', payload())
+        setDemo(created)
+        setSlugLocked(true)
         show('Draft created')
         navigate(`/admin/demos/${created.id}`, { replace: true })
         return created.id
       }
-      await api.put<Demo>(`/api/admin/demos/${demo.id}`, payload())
+      const updated = await api.put<Demo>(`/api/admin/demos/${demo.id}`, payload())
+      setDemo(updated)
       show('Saved')
       return demo.id
     } catch (e) {
@@ -83,11 +94,26 @@ export default function DemoEditor() {
         <div className={styles.row}>
           <div className={styles.field}>
             <label>Title</label>
-            <input value={demo.title} onChange={(e) => setDemo({ ...demo, title: e.target.value })} />
+            <input
+              value={demo.title}
+              onChange={(e) => {
+                const title = e.target.value
+                setDemo((d) => {
+                  const next = { ...d, title }
+                  onTitleChange(title, (slug) => { next.slug = slug })
+                  return next
+                })
+              }}
+            />
           </div>
           <div className={styles.field}>
             <label>Slug</label>
-            <input value={demo.slug} onChange={(e) => setDemo({ ...demo, slug: e.target.value })} />
+            <input
+              value={demo.slug}
+              onChange={(e) => onSlugChange(e.target.value, (slug) => setDemo((d) => ({ ...d, slug })))}
+              onBlur={(e) => onSlugBlur(e.target.value, (slug) => setDemo((d) => ({ ...d, slug })))}
+            />
+            <span className={styles.muted}>Auto-filled from title; collisions become -2, -3, … on save.</span>
           </div>
         </div>
         <div className={styles.field}>

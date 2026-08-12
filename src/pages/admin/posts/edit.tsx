@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import styles from '../../../components/admin/Admin.module.css'
 import MarkdownEditor from '../../../components/admin/MarkdownEditor'
 import { useToast } from '../../../components/admin/Toast'
+import { useAutoSlug } from '../../../components/admin/useAutoSlug'
 import { useAdminApi } from '../../../lib/api'
 import type { Post } from '../../../lib/types'
 
@@ -19,6 +20,7 @@ export default function PostEditor() {
   const navigate = useNavigate()
   const { show, node } = useToast()
   const fileInput = useRef<HTMLInputElement>(null)
+  const { onTitleChange, onSlugChange, onSlugBlur, setSlugLocked } = useAutoSlug(isNew)
 
   const [post, setPost] = useState<Post>(EMPTY)
   const [tagsText, setTagsText] = useState('')
@@ -32,6 +34,7 @@ export default function PostEditor() {
         if (found) {
           setPost(found)
           setTagsText((found.tags ?? []).join(', '))
+          setSlugLocked(true)
         }
       })
       .catch((e) => show(e.message, true))
@@ -52,11 +55,14 @@ export default function PostEditor() {
     try {
       if (isNew) {
         const created = await api.post<Post>('/api/admin/posts', payload())
+        setPost(created)
+        setSlugLocked(true)
         show('Draft created')
         navigate(`/admin/posts/${created.id}`, { replace: true })
         return created.id
       }
-      await api.put<Post>(`/api/admin/posts/${post.id}`, payload())
+      const updated = await api.put<Post>(`/api/admin/posts/${post.id}`, payload())
+      setPost(updated)
       show('Saved')
       return post.id
     } catch (e) {
@@ -112,11 +118,26 @@ export default function PostEditor() {
         <div className={styles.row}>
           <div className={styles.field}>
             <label>Title</label>
-            <input value={post.title} onChange={(e) => setPost({ ...post, title: e.target.value })} />
+            <input
+              value={post.title}
+              onChange={(e) => {
+                const title = e.target.value
+                setPost((p) => {
+                  const next = { ...p, title }
+                  onTitleChange(title, (slug) => { next.slug = slug })
+                  return next
+                })
+              }}
+            />
           </div>
           <div className={styles.field}>
             <label>Slug</label>
-            <input value={post.slug} onChange={(e) => setPost({ ...post, slug: e.target.value })} />
+            <input
+              value={post.slug}
+              onChange={(e) => onSlugChange(e.target.value, (slug) => setPost((p) => ({ ...p, slug })))}
+              onBlur={(e) => onSlugBlur(e.target.value, (slug) => setPost((p) => ({ ...p, slug })))}
+            />
+            <span className={styles.muted}>Auto-filled from title; collisions become -2, -3, … on save.</span>
           </div>
         </div>
         <div className={styles.field}>

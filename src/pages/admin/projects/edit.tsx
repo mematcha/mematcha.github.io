@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import styles from '../../../components/admin/Admin.module.css'
 import { useToast } from '../../../components/admin/Toast'
+import { useAutoSlug } from '../../../components/admin/useAutoSlug'
 import { useAdminApi } from '../../../lib/api'
 import type { PerspectiveContent, Project } from '../../../lib/types'
 
@@ -27,6 +28,7 @@ export default function ProjectEditor() {
   const api = useAdminApi()
   const navigate = useNavigate()
   const { show, node } = useToast()
+  const { onTitleChange, onSlugChange, onSlugBlur, setSlugLocked } = useAutoSlug(isNew)
 
   const [project, setProject] = useState<Project>(EMPTY)
   const [tagsText, setTagsText] = useState('')
@@ -41,6 +43,7 @@ export default function ProjectEditor() {
         if (found) {
           setProject(found)
           setTagsText((found.tags ?? []).join(', '))
+          setSlugLocked(true)
         }
       })
       .catch((e) => show(e.message, true))
@@ -69,11 +72,14 @@ export default function ProjectEditor() {
     try {
       if (isNew) {
         const created = await api.post<Project>('/api/admin/projects', payload())
+        setProject(created)
+        setSlugLocked(true)
         show('Draft created')
         navigate(`/admin/projects/${created.id}`, { replace: true })
         return created.id
       }
-      await api.put<Project>(`/api/admin/projects/${project.id}`, payload())
+      const updated = await api.put<Project>(`/api/admin/projects/${project.id}`, payload())
+      setProject(updated)
       show('Saved')
       return project.id
     } catch (e) {
@@ -113,11 +119,26 @@ export default function ProjectEditor() {
         <div className={styles.row}>
           <div className={styles.field}>
             <label>Title</label>
-            <input value={project.title} onChange={(e) => setProject({ ...project, title: e.target.value })} />
+            <input
+              value={project.title}
+              onChange={(e) => {
+                const title = e.target.value
+                setProject((p) => {
+                  const next = { ...p, title }
+                  onTitleChange(title, (slug) => { next.slug = slug })
+                  return next
+                })
+              }}
+            />
           </div>
           <div className={styles.field}>
             <label>Slug</label>
-            <input value={project.slug} onChange={(e) => setProject({ ...project, slug: e.target.value })} />
+            <input
+              value={project.slug}
+              onChange={(e) => onSlugChange(e.target.value, (slug) => setProject((p) => ({ ...p, slug })))}
+              onBlur={(e) => onSlugBlur(e.target.value, (slug) => setProject((p) => ({ ...p, slug })))}
+            />
+            <span className={styles.muted}>Auto-filled from title; collisions become -2, -3, … on save.</span>
           </div>
         </div>
         <div className={styles.field}>

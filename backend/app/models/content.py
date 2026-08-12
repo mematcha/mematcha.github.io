@@ -89,7 +89,7 @@ class PerspectiveContent(BaseModel):
 
 
 class ProjectIn(BaseModel):
-    slug: str
+    slug: str = ""
     title: str
     summary: str = ""
     ml_content: Optional[PerspectiveContent] = None
@@ -109,7 +109,7 @@ class Project(ProjectIn):
 
 
 class PostIn(BaseModel):
-    slug: str
+    slug: str = ""
     title: str
     excerpt: str = ""
     body_markdown: str = ""
@@ -127,7 +127,7 @@ class Post(PostIn):
 
 
 class DemoIn(BaseModel):
-    slug: str
+    slug: str = ""
     title: str
     description: str = ""
     demo_type: DemoType = DemoType.link
